@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}New Match{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="outCome">Outcome</label>
+    <div class="radio-input">
+      <input type="radio" name="outCome" value="win" required> Win </input> <br>
+      <input type="radio" name="outCome" value="loss" required> Loss </input> <br>
+    </div>
+    <!--<input name="outCome" id="title" value="{{ request.form['outCome'] }}" required>-->
+
+      <label for="bestOf">Best Of</label>
+    <div class="radio-input">
+      <input type="radio" name="bestOf" value="1" required> 1  </input><br>
+      <input type="radio" name="bestOf" value="2" required> 2  </input><br>
+      <input type="radio" name="bestOf" value="3" required> 3  </input><br>
+    </div>
+
+    <!--<select class="" name="bestOf">
+      <option value="1">1 {{ request.form['bestOf'] }}</option>
+      <option value="2">2 {{ request.form['bestOf'] }}</option>
+      <option value="3">3 {{ request.form['bestOf'] }}</option>
+
+    </select>-->
+    <!--<label for="bestOf">Best Of</label>
+    <input name="bestOf" id="body">{{ request.form['bestOf'] }}</input>-->
+
+    <label for="enemy">Enemy</label>
+    <input name="enemy" id="body"></input>
+
+    <label for="score">Score <i>(x - x)</i></label>
+    <input name="score" id="body"></input>
+
+    <label for="league">League</label>
+    <input name="league" id="body"></input>
+
+    <label for="mapOne">Map One <i>(map x - x)</i></label>
+    <input name="mapOne" id="body"></input>
+
+    <label for="mapTwo">Map Two <i>(map x - x)</i> </label>
+    <input name="mapTwo" id="body"></input>
+
+    <label for="mapThree">Map Three <i>(map x - x)</i></label>
+    <input name="mapThree" id="body"></input>
+
+    <input type="submit" value="Save">
+  </form>
+{% endblock %}
