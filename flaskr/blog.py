@@ -13,17 +13,23 @@ def index():
     db = get_db()
     posts = db.execute(
         'SELECT p.id, outCome,bestOf,enemy,score,league,mapOne,mapTwo,mapThree, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
+        ' FROM result p JOIN user u ON p.author_id = u.id'
         ' ORDER BY created DESC'
     ).fetchall()
-    return render_template('blog/index.html', posts=posts)
 
-@bp.route('/api/data')
-def data():
+    posts_upcoming = db.execute(
+        'SELECT p.id,upcoming_match_day, upcoming_startTime,upcoming_bestOf,upcoming_enemy,upcoming_league,upcoming_stage, created, author_id, username'
+        ' FROM upcoming p JOIN user u ON p.author_id = u.id'
+        ' ORDER BY created DESC'
+    ).fetchall()
+    return render_template('blog/index.html',upcoming=posts_upcoming, results=posts)
+
+@bp.route('/api/data/results')
+def results_data():
     db = get_db()
     posts = db.execute(
         'SELECT p.id, outCome,bestOf,enemy,score,league,mapOne,mapTwo,mapThree, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
+        ' FROM result p JOIN user u ON p.author_id = u.id'
         ' ORDER BY created DESC'
     ).fetchall()
     items = []
@@ -31,10 +37,23 @@ def data():
         items.append({'outCome':row[1], 'bestOf':row[2], 'enemy':row[3],'score':row[4],'league':row[5], 'mapOne':row[6], 'mapTwo':row[7], 'mapThree':row[8],'created':row[9]})
     return jsonify(items)
 
+@bp.route('/api/data/upcoming')
+def upcoming_data():
+    db = get_db()
+    posts = db.execute(
+        'SELECT p.id, upcoming_match_day,upcoming_startTime,upcoming_enemy,upcoming_league,upcoming_league,upcoming_bestOf,upcoming_stage, author_id, username'
+        ' FROM upcoming p JOIN user u ON p.author_id = u.id'
+        ' ORDER BY created DESC'
+    ).fetchall()
+    items = []
+    for row in posts:
+        items.append({'upcoming_match_day':row[1], 'upcoming_startTime':row[2], 'upcoming_enemy':row[3],'upcoming_league':row[4],'upcoming_bestOf':row[5], 'upcoming_stage':row[6],'created':row[9]})
+    return jsonify(items)
 
-@bp.route('/create', methods=('GET', 'POST'))
+
+@bp.route('/create_result', methods=('GET', 'POST'))
 @login_required
-def create():
+def create_result():
     if request.method == 'POST':
         outCome = request.form['outCome']
         bestOf = request.form['bestOf']
@@ -69,19 +88,64 @@ def create():
         else:
             db = get_db()
             db.execute(
-                'INSERT INTO post (outCome,bestOf,enemy,score,league,mapOne,mapTwo,mapThree, author_id)'
+                'INSERT INTO result (outCome,bestOf,enemy,score,league,mapOne,mapTwo,mapThree, author_id)'
                 ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 (outCome, bestOf, enemy, score, league, mapOne, mapTwo, mapThree, g.user['id'])
             )
             db.commit()
             return redirect(url_for('blog.index'))
 
-    return render_template('blog/create.html')
+    return render_template('blog/create_result.html')
 
-def get_post(id, check_author=True):
+
+@bp.route('/create_upcoming', methods=('GET', 'POST'))
+@login_required
+def create_upcoming():
+    if request.method == 'POST':
+
+        match_day = request.form['match_day']
+        startTime = request.form['startTime']
+        enemy = request.form['enemy']
+        league = request.form['league']
+        bestOf = request.form['bestOf']
+        stage = request.form['stage']
+
+        error = None
+
+
+        if not match_day:
+            error = 'Match day is required'
+
+        if not startTime:
+            error = 'Starting time is required'
+
+        if not enemy:
+            enemy = 'TBA'
+
+        if not bestOf:
+            bestOf = 'TBA'
+
+        if not stage:
+            error = 'Stage is required'
+
+        if error is not None:
+            flash(error)
+        else:
+            db = get_db()
+            db.execute(
+                'INSERT INTO upcoming (upcoming_match_day, upcoming_startTime,upcoming_enemy,upcoming_league,upcoming_bestOf,upcoming_stage, author_id)'
+                ' VALUES (?, ?, ?, ?, ?, ?,?)',
+                (match_day,startTime,enemy,league,bestOf,stage, g.user['id'])
+            )
+            db.commit()
+            return redirect(url_for('blog.index'))
+
+    return render_template('blog/create_upcoming.html')
+
+def get_result(id, check_author=True):
     post = get_db().execute(
         'SELECT p.id, outCome, bestOf, enemy, score, league, mapOne, mapTwo, mapThree, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
+        ' FROM result p JOIN user u ON p.author_id = u.id'
         ' WHERE p.id = ?',
         (id,)
     ).fetchone()
@@ -94,10 +158,26 @@ def get_post(id, check_author=True):
 
     return post
 
-@bp.route('/<int:id>/update', methods=('GET', 'POST'))
+def get_upcoming(id, check_author=True):
+    post = get_db().execute(
+        'SELECT p.id, upcoming_match_day,upcoming_startTime,upcoming_enemy,upcoming_league,upcoming_league,upcoming_bestOf,upcoming_stage, author_id, username'
+        ' FROM upcoming p JOIN user u ON p.author_id = u.id'
+        ' WHERE p.id = ?',
+        (id,)
+    ).fetchone()
+
+    if post is None:
+        abort(404, "Post id {0} doesn't exist.".format(id))
+
+    if check_author and post['author_id'] != g.user['id']:
+        abort(403)
+
+    return post
+
+@bp.route('/result/<int:id>/update', methods=('GET', 'POST'))
 @login_required
-def update(id):
-    post = get_post(id)
+def update_result(id):
+    post = get_result(id)
 
     if request.method == 'POST':
         outCome = request.form['outCome']
@@ -133,20 +213,74 @@ def update(id):
         else:
             db = get_db()
             db.execute(
-                'UPDATE post SET outCome = ?, bestOf = ?, enemy = ?, score = ?, league = ?, mapOne = ?, mapTwo = ?, mapThree = ?'
+                'UPDATE result SET outCome = ?, bestOf = ?, enemy = ?, score = ?, league = ?, mapOne = ?, mapTwo = ?, mapThree = ?'
                 ' WHERE id = ?',
                 (outCome, bestOf, enemy, score, league, mapOne, mapTwo, mapThree, id)
             )
             db.commit()
             return redirect(url_for('blog.index'))
 
-    return render_template('blog/update.html', post=post)
+    return render_template('blog/update_result.html', post=post)
 
-@bp.route('/<int:id>/delete', methods=('POST',))
+@bp.route('/upcoming/<int:id>/update', methods=('GET', 'POST'))
 @login_required
-def delete(id):
-    get_post(id)
+def update_upcoming(id):
+    post = get_upcoming(id)
+
+    if request.method == 'POST':
+        match_day = request.form['match_day']
+        startTime = request.form['startTime']
+        enemy = request.form['enemy']
+        league = request.form['league']
+        bestOf = request.form['bestOf']
+        stage = request.form['stage']
+
+
+        error = None
+
+        if not match_day:
+            error = 'Match day is required'
+
+        if not startTime:
+            error = 'Starting time is required'
+
+        if not enemy:
+            enemy = 'TBA'
+
+        if not bestOf:
+            bestOf = 'TBA'
+
+        if not stage:
+            error = 'Stage is required'
+
+        if error is not None:
+            flash(error)
+        else:
+            db = get_db()
+            db.execute(
+                'UPDATE upcoming SET upcoming_match_day = ?, upcoming_startTime = ?, upcoming_enemy = ?, upcoming_league = ?, upcoming_bestOf = ?, upcoming_stage = ?'
+                ' WHERE id = ?',
+                (match_day, startTime, enemy, league, bestOf, stage, id)
+            )
+            db.commit()
+            return redirect(url_for('blog.index'))
+
+    return render_template('blog/update_upcoming.html', post=post)
+
+@bp.route('/result/<int:id>/delete', methods=('POST',))
+@login_required
+def delete_result(id):
+    get_result(id)
     db = get_db()
-    db.execute('DELETE FROM post WHERE id = ?', (id,))
+    db.execute('DELETE FROM result WHERE id = ?', (id,))
+    db.commit()
+    return redirect(url_for('blog.index'))
+
+@bp.route('/upcoming/<int:id>/delete', methods=('POST',))
+@login_required
+def delete_upcoming(id):
+    get_upcoming(id)
+    db = get_db()
+    db.execute('DELETE FROM upcoming WHERE id = ?', (id,))
     db.commit()
     return redirect(url_for('blog.index'))

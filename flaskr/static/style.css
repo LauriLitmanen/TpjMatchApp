@@ -38,3 +38,42 @@ input[type=submit] { align-self: start; min-width: 10em; }
 .radio-input {
   flex-direction: row;
 }
+
+.content{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.results {
+  width: 50%;
+  padding: 20px;
+}
+.results-header {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.upcoming {
+  width: 50%;
+  padding: 20px;
+}
+
+.upcoming-header {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.upcoming header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: row;
+}

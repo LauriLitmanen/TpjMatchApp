@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS post;
+DROP TABLE IF EXISTS result;
+DROP TABLE IF EXISTS upcoming;
 
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -7,7 +8,7 @@ CREATE TABLE user (
   password TEXT NOT NULL
 );
 
-CREATE TABLE post (
+CREATE TABLE result (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   author_id INTEGER NOT NULL,
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -19,5 +20,18 @@ CREATE TABLE post (
   mapOne TEXT NOT NULL,
   mapTwo TEXT,
   mapThree TEXT,
+  FOREIGN KEY (author_id) REFERENCES user (id)
+);
+
+CREATE TABLE upcoming (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  author_id INTEGER NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  upcoming_match_day TEXT NOT NULL,
+  upcoming_startTime TEXT NOT NULL,
+  upcoming_enemy TEXT NOT NULL,
+  upcoming_league TEXT NOT NULL,
+  upcoming_bestOf TEXT NOT NULL,
+  upcoming_stage TEXT NOT NULL,
   FOREIGN KEY (author_id) REFERENCES user (id)
 );
