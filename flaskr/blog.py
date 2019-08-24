@@ -41,13 +41,13 @@ def results_data():
 def upcoming_data():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, upcoming_match_day,upcoming_startTime,upcoming_enemy,upcoming_league,upcoming_league,upcoming_bestOf,upcoming_stage, author_id, username'
+        'SELECT p.id, upcoming_match_day,upcoming_startTime,upcoming_enemy,upcoming_league,upcoming_bestOf,upcoming_stage, author_id, username'
         ' FROM upcoming p JOIN user u ON p.author_id = u.id'
         ' ORDER BY created DESC'
     ).fetchall()
     items = []
     for row in posts:
-        items.append({'upcoming_match_day':row[1], 'upcoming_startTime':row[2], 'upcoming_enemy':row[3],'upcoming_league':row[4],'upcoming_bestOf':row[5], 'upcoming_stage':row[6],'created':row[9]})
+        items.append({'upcoming_match_day':row[1], 'upcoming_startTime':row[2], 'upcoming_enemy':row[3],'upcoming_league':row[4],'upcoming_bestOf':row[5], 'upcoming_stage':row[6],'created':row[8]})
     return jsonify(items)
 
 
