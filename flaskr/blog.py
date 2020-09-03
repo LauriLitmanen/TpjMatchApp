@@ -1,6 +1,8 @@
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for,jsonify
 )
+
+import flask
 from werkzeug.exceptions import abort
 
 from flaskr.auth import login_required
@@ -55,14 +57,14 @@ def upcoming_data():
 @login_required
 def create_result():
     if request.method == 'POST':
-        outCome = request.form['outCome']
-        bestOf = request.form['bestOf']
-        enemy = request.form['enemy']
-        score = request.form['score']
-        league = request.form['league']
-        mapOne = request.form['mapOne']
-        mapTwo = request.form['mapTwo']
-        mapThree = request.form['mapThree']
+        outCome = flask.Markup.escape(request.form['outCome'])
+        bestOf = flask.Markup.escape(request.form['bestOf'])
+        enemy = flask.Markup.escape(request.form['enemy'])
+        score = flask.Markup.escape(request.form['score'])
+        league = flask.Markup.escape(request.form['league'])
+        mapOne = flask.Markup.escape(request.form['mapOne'])
+        mapTwo = flask.Markup.escape(request.form['mapTwo'])
+        mapThree = flask.Markup.escape(request.form['mapThree'])
         error = None
 
         if not outCome:
@@ -103,12 +105,12 @@ def create_result():
 def create_upcoming():
     if request.method == 'POST':
 
-        match_day = request.form['match_day']
-        startTime = request.form['startTime']
-        enemy = request.form['enemy']
-        league = request.form['league']
-        bestOf = request.form['bestOf']
-        stage = request.form['stage']
+        match_day = flask.Markup.escape(request.form['match_day'])
+        startTime = flask.Markup.escape(request.form['startTime'])
+        enemy = flask.Markup.escape(request.form['enemy'])
+        league = flask.Markup.escape(request.form['league'])
+        bestOf = flask.Markup.escape(request.form['bestOf'])
+        stage = flask.Markup.escape(request.form['stage'])
 
         error = None
 
